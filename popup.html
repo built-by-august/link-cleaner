@@ -375,21 +375,16 @@
 
     <!-- Upgrade -->
     <div class="upgrade-card" id="upgradeBtn">
-      <div class="upgrade-icon">&#9733;</div>
+      <div class="upgrade-icon" id="upgradeIcon">&#9733;</div>
       <div class="upgrade-text">
         <div class="upgrade-title" id="upgradeTitle">Upgrade to Pro</div>
-        <div class="upgrade-sub" id="upgradeSub">$2.99/mo or $4.99/yr</div>
+        <div class="upgrade-sub" id="upgradeSub">$4.99/yr</div>
       </div>
       <span class="upgrade-arrow">&#8594;</span>
     </div>
 
-    <!-- Activation (hidden by default) -->
-    <div id="activationSection" style="display:none; margin-top: 12px;">
-      <div style="display:flex; gap:8px; margin-bottom: 6px;">
-        <input id="licenseInput" type="text" placeholder="Paste your license key" style="flex:1; padding:10px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.05); color:#e4e4ec; font-size:13px; outline:none;">
-        <button id="activateBtn" style="padding:10px 16px; border:none; border-radius:8px; background:#3b82f6; color:#fff; font-weight:600; cursor:pointer; font-size:13px;">Activate</button>
-      </div>
-      <div id="activationMsg" style="font-size:12px; color:#8b8ba3; text-align:center;"></div>
+    <div style="padding: 0 20px 14px; text-align: center; font-size: 11px; color: #6b6b83;">
+      Already purchased? <strong style="color:#8b8ba3;cursor:pointer;" id="activateProLink">Double-click here to activate</strong>
     </div>
 
     <!-- Stats (hidden by default) -->
