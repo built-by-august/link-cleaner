@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   chrome.storage.sync.get(['proLicense'], (result) => {
     proEnabled = result.proLicense === true;
     upgradeBtn.onclick = () => {
-      window.open('https://buy.stripe.com/test_14A9ASenPb2BdkR1Y15EY00', '_blank');
+      window.open('https://buy.stripe.com/4gM3cucc29K64cg5SqbjW02', '_blank');
     };
     if (proEnabled) {
       upgradeTitle.textContent = 'Pro Active';
