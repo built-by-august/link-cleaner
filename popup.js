@@ -67,31 +67,74 @@ document.addEventListener('DOMContentLoaded', async () => {
   let dailyCleaned = (stored.lastDate === today) ? (stored.dailyCleaned || 0) : 0;
   let dailyTrackers = (stored.lastDate === today) ? (stored.dailyTrackers || 0) : 0;
 
-  // ─── Pro license gate ────────────────────────────────────────
-  // Simplified: Pro is activated on the honor system via Stripe purchase.
-  // User clicks "Upgrade to Pro", pays via Stripe, then clicks "Activate" here.
+  // ─── 7-day trial + Pro license gate ──────────────────────────
+  // Stripped tracking data is shared; Pro features (auto-clean on copy,
+  // right-click, clean-on-click) unlock during the 7-day trial or on purchase.
   let proEnabled = false;
+  let trialDaysLeft = 0;
 
-  chrome.storage.sync.get(['proLicense'], (result) => {
-    proEnabled = result.proLicense === true;
+  function calcTrialDays(installDate) {
+    if (!installDate) return 7;
+    return Math.max(0, 7 - Math.floor((Date.now() - installDate) / 86400000));
+  }
+
+  async function initLicense() {
+    const result = await chrome.storage.sync.get(['proLicense', 'installDate']);
+
+    // First run — set install date
+    if (!result.installDate) {
+      await chrome.storage.sync.set({ installDate: Date.now() });
+      trialDaysLeft = 7;
+    } else {
+      trialDaysLeft = calcTrialDays(result.installDate);
+    }
+
+    const purchased = result.proLicense === true;
+    const inTrial = trialDaysLeft > 0 && !purchased;
+    proEnabled = purchased || inTrial;
+
+    // Update badge
+    const badge = document.getElementById('proBadge');
+    if (purchased) {
+      badge.textContent = 'Pro';
+      badge.style.background = 'rgba(34,197,94,0.15)';
+      badge.style.color = '#22c55e';
+    } else if (inTrial) {
+      badge.textContent = `Trial · ${trialDaysLeft}d`;
+      badge.style.background = 'rgba(59,130,246,0.15)';
+      badge.style.color = '#60a5fa';
+    } else {
+      badge.textContent = 'Free';
+      badge.style.background = 'rgba(255,255,255,0.05)';
+      badge.style.color = '#6b6b83';
+    }
+
+    // Upgrade card
     upgradeBtn.onclick = () => {
       window.open('https://buy.stripe.com/4gM3cucc29K64cg5SqbjW02', '_blank');
     };
-    if (proEnabled) {
+
+    if (purchased) {
       upgradeTitle.textContent = 'Pro Active';
       upgradeSub.textContent = 'All features unlocked, thank you!';
       upgradeIcon.innerHTML = '&#10003;';
       upgradeIcon.style.background = 'rgba(34,197,94,0.15)';
+    } else if (inTrial) {
+      upgradeTitle.textContent = `Trial · ${trialDaysLeft} day${trialDaysLeft > 1 ? 's' : ''} left`;
+      upgradeSub.textContent = 'Pro features unlocked until trial ends';
+    } else {
+      upgradeTitle.textContent = 'Upgrade to Pro';
+      upgradeSub.textContent = '$4.99/yr';
     }
-  });
+  }
 
-  // Manual activation for existing purchasers
+  // Initialize license state on open
+  await initLicense();
+
+  // Manual activation for purchasers
   upgradeBtn.addEventListener('dblclick', async () => {
     await chrome.storage.sync.set({ proLicense: true });
-    upgradeTitle.textContent = 'Pro Active';
-    upgradeSub.textContent = 'All features unlocked, thank you!';
-    upgradeIcon.innerHTML = '&#10003;';
-    upgradeIcon.style.background = 'rgba(34,197,94,0.15)';
+    initLicense();
   });
   
   const isActive = stored.autoClean !== false;

@@ -39,12 +39,20 @@ function cleanUrl(url) {
   }
 }
 
+// ─── Trial helper ────────────────────────────────────────────
+function calcTrialDays(installDate) {
+  if (!installDate) return 7;
+  return Math.max(0, 7 - Math.floor((Date.now() - installDate) / 86400000));
+}
+
 // Install handler
 chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.sync.set({ autoClean: true });
-  // Check if Pro and add context menu
-  chrome.storage.sync.get(['proLicense'], (result) => {
-    if (result.proLicense === true) {
+  // Check if Pro or in trial for context menu
+  chrome.storage.sync.get(['proLicense', 'installDate'], (result) => {
+    const purchased = result.proLicense === true;
+    const inTrial = calcTrialDays(result.installDate) > 0 && !purchased;
+    if (purchased || inTrial) {
       chrome.contextMenus.create({
         id: 'copy-clean-link',
         title: 'Copy Clean Link',

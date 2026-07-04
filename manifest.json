@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Link Cleaner Pro",
-  "version": "2.0",
+  "version": "2.1",
   "description": "Auto-cleans tracking from every URL you copy. Strips fbclid, utm_*, gclid, and 50+ trackers before they reach your clipboard.",
   "permissions": [
     "activeTab",

@@ -78,11 +78,18 @@ function showToast(count, action) {
   } catch(e) {}
 }
 
-// ─── Pro license gate ────────────────────────────────────────────────────────
+// ─── Pro license + trial gate ──────────────────────────────────────
+function calcTrialDays(installDate) {
+  if (!installDate) return 7;
+  return Math.max(0, 7 - Math.floor((Date.now() - installDate) / 86400000));
+}
+
 let proEnabled = false;
 
-chrome.storage.sync.get(['proLicense'], (result) => {
-  proEnabled = result.proLicense === true;
+chrome.storage.sync.get(['proLicense', 'installDate'], (result) => {
+  const purchased = result.proLicense === true;
+  const inTrial = calcTrialDays(result.installDate) > 0 && !purchased;
+  proEnabled = purchased || inTrial;
 });
 
 chrome.storage.onChanged.addListener((changes) => {
